@@ -1,0 +1,61 @@
+- hosts: "{{ host }}"
+  vars_prompt:
+          - name: host
+            prompt: "Enter Host (e.g : all ) "
+            private: no
+  tasks: 
+  - name: cli
+    copy:
+      src: "/root/Downloads/docker-ce-cli-19.03.14-3.el8.x86_64.rpm"
+      dest: "/root/Downloads"
+    tags : name
+  - name: docker-ce.rpm
+    copy:
+      src: "/root/Downloads/docker-ce-19.03.14-3.el8.x86_64.rpm"
+      dest: "/root/Downloads"
+
+  - name: "installing docker"
+    yum_repository:
+      name: dockername
+      description: dockerRepoConfig
+      baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+      gpgcheck: no
+  - name: downloading docker cli via yum
+    command: "yum install /root/Downloads/docker-ce-cli-19.03.14-3.el8.x86_64.rpm -y"
+    tags: t
+  - name: downloading docker via yum
+    command: "yum install docker-ce --nobest -y"
+    tags: t
+  - name: running the services
+    service:
+      name: "docker"
+      state: started
+  - name: "docker config"
+    docker_container:
+      name: web1
+      image: httpd
+      pull: yes
+      state: started
+      network_mode: host
+    tags: test
+  - name: copying the html file into the htdocs
+    command: "docker cp /var/www/html/sample.html web1:/usr/local/apache2/htdocs"
+    tags: test
+  - name: "stopping firewalld"
+    service:
+      name: "firewalld"                
+      state: stopped
+  - name: "getenforce"
+    command: "setenforce 0" 
+  - name: debug
+    debug:
+      msg: "🔰Write an Ansible PlayBook that does the 
+           following operations in the managed nodes
+           🔹 Configure Docker
+           🔹 Start and enable Docker services
+           🔹 Pull the httpd server image from the Docker Hub
+           🔹 Run the docker container and expose it to the public
+           🔹 Copy the html code in /var/www/html directory
+              and start the web server
+              The task was successfully finished"
+    tags: debug
