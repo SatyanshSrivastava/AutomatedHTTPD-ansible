@@ -1,0 +1,19 @@
+- hosts: localhost
+  tasks:
+  - name: "Installing HTTPD"
+    package:
+      name: httpd
+      state: present
+  - name:
+    copy:
+      src: "sampletask11_3.html"
+      dest: "/var/www/html/"
+    register: x
+  - name: "testing"
+    debug: 
+      var: x
+  - name: "Starting the services provided that the service isn't running"
+    service:
+      name: httpd
+      state: restarted
+    when: x.changed == true
